@@ -1,10 +1,11 @@
 import requests 
-endpoint = "https://httpbin.org/status/200/"
-endpoint = "https://httpbin.org/"
+# endpoint = "https://httpbin.org/status/200/"
+# endpoint = "https://httpbin.org/"
+endpoint = "http://localhost:8000/api/"
 
 
-get_response = requests.get(endpoint) # HTTP Request
-print(get_response.text)
+get_response = requests.get(endpoint, data={'query':'Hello World'}) # HTTP Request
+# print(get_response.text)
 
-
-git remote add origin https://github.com/Stmbisa/drf.git
+print(get_response.json()['message'])
+print(get_response.status_code)
