@@ -9,9 +9,14 @@ class ProductSerializer(serializers.ModelSerializer):
         fields = ['title', 'price','sale_price', 'my_discount']
 
     def get_my_discount(self, obj):
+        if not hasattr(obj, 'id'):
+            return None
+        if not isinstance(obj, Product): # this is same as as if not hasattr(obj, 'id'): 
+            return None
         # obj here is the object you can query anything like obj.id or any field
-        try:
-            return obj.get_discount()
-        except:
-            return None 
+        return obj.get_discount()
+        # try:
+        #     return obj.get_discount()
+        # except:
+        #     return None 
     
