@@ -1,25 +1,33 @@
-from rest_framework import authentication, generics, mixins, permissions
+from rest_framework import generics, mixins #authentication,
+# from api.authentication import TokenAuthentication
 
 from .models import Product
 from .serializers import ProductSerializer
-from .permission import IsStaffEditorPermission
-
+# from api.permissions import IsStaffEditorPermission
+from api.mixins import StaffEditorPermissionMixin 
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from rest_framework import status
 # from django.http import Http404
 from django.shortcuts import get_object_or_404
 
-class ProductListCreateView(generics.ListCreateAPIView):
+class ProductListCreateView(
+    StaffEditorPermissionMixin, 
+    generics.ListCreateAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
-    authentication_classes = (authentication.SessionAuthentication,)
+    # authentication_classes = (
+    #     authentication.SessionAuthentication,
+    #     TokenAuthentication
+    #                           ) set in deffault authentication_classes
     # permission_classes = [permissions.DjangoModelPermissions]
-    permission_classes = [IsStaffEditorPermission]
+    # permission_classes = [permissions.IsAdminUser, IsStaffEditorPermission] # replaced by the custom mixin
 
     def perform_create(self, serializer):
         # serializer.save(user=self.request.user,)
         print(serializer.validated_data)
+        email = serializer.validated_data.pop('email')
+        print(email)
         title = serializer.validated_data.get('title')
         content = serializer.validated_data.get('content') or None
         if content is None:
@@ -46,10 +54,13 @@ class ProductDetailAPIView(generics.RetrieveAPIView):
     serializer_class = ProductSerializer
     # lookup_field = 'pk'
 
-class ProductUpdateAPIView(generics.UpdateAPIView):
+class ProductUpdateAPIView(
+    StaffEditorPermissionMixin,
+    generics.UpdateAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
     lookup_field = 'pk'
+    # authentication_classes = (authentication.SessionAuthentication,)
 
     def perform_update(self, serializer):
         instance = serializer.save()
@@ -59,10 +70,14 @@ class ProductUpdateAPIView(generics.UpdateAPIView):
 product_update_view = ProductUpdateAPIView.as_view()
 
 
-class ProductDestroyAPIView(generics.DestroyAPIView):
+class ProductDestroyAPIView(
+    StaffEditorPermissionMixin,
+    generics.DestroyAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
     lookup_field = 'pk'
+    
+
 
     def perform_destroy(self, instance):
         # do something with the instance
@@ -81,6 +96,7 @@ product_delete_view = ProductDestroyAPIView .as_view()
 
 
 class ProductMixinView(
+    StaffEditorPermissionMixin,
     mixins.CreateModelMixin,
     mixins.ListModelMixin,
     mixins.RetrieveModelMixin,
@@ -88,7 +104,9 @@ class ProductMixinView(
     ):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
-    lookup_field = 'pk' #default settings but can change 
+    lookup_field = 'pk' #default settings but can change
+
+
 
     def get(self, request, *args, **kwargs):
         print(args, kwargs)
