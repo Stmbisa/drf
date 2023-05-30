@@ -10,10 +10,9 @@ class UserProductInlineSerializer(serializers.Serializer):
         )
     title = serializers.CharField(required=True)
 
-# its advised to use modelserializer when you know you will need create and update and also its better to default to model serializer because you dont know when you might need it 
+
 class UserPublicSerializer(serializers.Serializer):
     username = serializers.CharField(read_only=True)
-    # email = serializers.EmailField(read_only=True) #no good to share user's email publicly
     id = serializers.IntegerField(read_only=True)
     # my_other_products = serializers.SerializerMethodField(read_only=True)
 
